@@ -1,0 +1,114 @@
+﻿<Window x:Class="Serial_Monitor_App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Serial_Monitor_App"
+        mc:Ignorable="d"
+        
+        Title="MainWindow" Height="450" Width="800"
+        Closed="Window_Closed">
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <!-- Configuracion del puerto y los baudios -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="6*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <Label
+                Content="PORT:"
+                HorizontalAlignment="Right"/>
+
+            <Label
+                Content="BaudRate:"
+                HorizontalAlignment="Right"
+                Grid.Row="1"/>
+
+            <ComboBox 
+                x:Name="portsComboBox"
+                Margin="5" Grid.ColumnSpan="2"
+                Grid.Column="1" Grid.Row="0"/>
+
+            <ComboBox
+                x:Name="baudrateComboBox"
+                Margin="5" Grid.ColumnSpan="2"
+                Grid.Column="1" Grid.Row="1">
+                <ComboBoxItem>300</ComboBoxItem>
+                <ComboBoxItem>600</ComboBoxItem>
+                <ComboBoxItem>750</ComboBoxItem>
+                <ComboBoxItem>1200</ComboBoxItem>
+                <ComboBoxItem>2400</ComboBoxItem>
+                <ComboBoxItem>4800</ComboBoxItem>
+                <ComboBoxItem IsSelected="True">9600</ComboBoxItem>
+                <ComboBoxItem>19200</ComboBoxItem>
+                <ComboBoxItem>31250</ComboBoxItem>
+                <ComboBoxItem>38400</ComboBoxItem>
+                <ComboBoxItem>57600</ComboBoxItem>
+                <ComboBoxItem>74880</ComboBoxItem>
+                <ComboBoxItem>115200</ComboBoxItem>
+            </ComboBox>
+
+            <Button
+                x:Name="scanPortsBtn" Content="Scan" Click="scanPortsBtn_Click"
+                Margin="5"
+                Grid.Column="3"/>
+
+            <Button
+                x:Name="toggleConnectionBtn" Content="Connect" Click="toggleConnectionBtn_Click"
+                Margin="5"
+                Grid.Column="3" Grid.Row="1"/>
+        </Grid>
+        
+        <!-- Monitor Serial y entrada de datos -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBox
+                x:Name="txtMonitor"
+                VerticalScrollBarVisibility="Auto"
+                TextWrapping="Wrap" IsReadOnly="True"
+                Margin="0,5"
+                Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"/>
+
+            <TextBox x:Name="txtCommand"
+                     GotFocus="txtCommand_GotFocus"
+                     Grid.Column="0" Grid.Row="1"/>
+            
+            <!--
+            <TextBlock
+                x:Name="txtPlaceholder" Text="Message"
+                Foreground="Gray"
+                Grid.Column="0" Grid.Row="1"/>
+            -->
+            
+            <Button 
+                x:Name="sendDataBtn" Content="Send" Click="sendDataBtn_Click"
+                Padding="5,0,5,0" 
+                Grid.Column="1" Grid.Row="1"/>
+
+        </Grid>
+    </Grid>
+</Window>
