@@ -13,17 +13,29 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO.Ports;
+using LiveCharts;
+using LiveCharts.Wpf;
 
 namespace Serial_Monitor_App
 {
     public partial class MainWindow : Window
     {
         private SerialPort serialPort;
+        public SeriesCollection ChartSeries { get; set; }
+
+        public string[] baudrate_options { get; set; } 
 
         public MainWindow()
         {
             InitializeComponent();
             LoadAvailablePorts();
+
+            baudrate_options = new string[] { "300", "600", "750", "1200", "2400", "4800", "9600", "19200", "31250", "38400", "57600", "74880", "115200" };
+            baudrateComboBox.SelectedIndex = 6;
+
+            ChartSeries = new SeriesCollection();
+
+            DataContext = this;
         }
 
         private void LoadAvailablePorts()
@@ -49,41 +61,40 @@ namespace Serial_Monitor_App
             LoadAvailablePorts();
         }
 
-        private void toggleConnectionBtn_Click(object sender, RoutedEventArgs e)
+        private async void toggleConnectionBtn_Click(object sender, RoutedEventArgs e)
         {
             if (serialPort == null || !serialPort.IsOpen)
             {
                 if (portsComboBox.SelectedItem != null && baudrateComboBox.SelectedItem != null)
                 {
                     string selectedPort = portsComboBox.SelectedItem.ToString();
-                    int baudRate = int.Parse(baudrateComboBox.SelectedItem.ToString());
-                    Console.WriteLine("Port: " + selectedPort);
-                    Console.WriteLine(baudRate);
+                    int selectedBaudRate = int.Parse(baudrateComboBox.SelectedItem.ToString());
+                    try
+                    {
+                        serialPort = new SerialPort(selectedPort, selectedBaudRate);
+                        serialPort.DataReceived += SerialPort_DataReceived;
 
-                    // int selectedBaudRate = int.Parse(baudrateComboBox.SelectedItem.ToString());
-                //    try
-                //    {
-                //        serialPort = new SerialPort(selectedPort, 9600);
-                //        serialPort.DataReceived += SerialPort_DataReceived;
-                //        serialPort.Open();
-                //        toggleConnectionBtn.Content = "Disconnect";
-                //        portsComboBox.IsEnabled = false;
-                //        baudrateComboBox.IsEnabled = false;
-                //        scanPortsBtn.IsEnabled = false;
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        MessageBox.Show($"Error al abrir el puerto: {ex.Message}");
-                //    }
+                        //serialPort.Open();
+                        await Task.Run(() => serialPort.Open()); // Abrir en segundo plano
+                        
+                        // Cambios en la interfaz
+                        toggleConnectionBtn.Content = "Disconnect";
+                        portsComboBox.IsEnabled = false;
+                        baudrateComboBox.IsEnabled = false;
+                        scanPortsBtn.IsEnabled = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al abrir el puerto: {ex.Message}");
+                    }
                 }
-                else
-                {
-                    MessageBox.Show("Selecciona un puerto válido.");
-                }
+                else MessageBox.Show("Selecciona un puerto válido.");
             }
             else
             {
                 serialPort.Close();
+
+                // Cambios en la interfaz
                 toggleConnectionBtn.Content = "Connect";
                 portsComboBox.IsEnabled = true;
                 baudrateComboBox.IsEnabled = true;
@@ -96,15 +107,55 @@ namespace Serial_Monitor_App
             try
             {
                 string data = serialPort.ReadLine();
+                string[] values = data.Split(',');
+
                 Dispatcher.Invoke(() =>
                 {
-                    txtMonitor.AppendText("[Device]: " + data + Environment.NewLine);
+                    // Imprimir en el monitor serial
+                    txtMonitor.AppendText("[Device]: " + data);
                     txtMonitor.ScrollToEnd();
+
+                    // Graficacion de los valores
+                    int count = values.Length;
+
+                    // Verificar cuántas series hay y ajustar dinámicamente
+                    while (ChartSeries.Count < count)
+                    {
+                        ChartSeries.Add(new LineSeries
+                        {
+                            Title = "Valor " + (ChartSeries.Count + 1),
+                            Values = new ChartValues<double>()
+                        });
+                    }
+
+                    while (ChartSeries.Count > count)
+                    {
+                        ChartSeries.RemoveAt(ChartSeries.Count - 1);
+                    }
+
+                    // Agregar los valores recibidos a las series correspondientes
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (double.TryParse(values[i], out double parsedValue))
+                        {
+                            ChartSeries[i].Values.Add(parsedValue);
+
+                            // Limitar datos para evitar saturación
+                            if (ChartSeries[i].Values.Count > 6)
+                            {
+                                ChartSeries[i].Values.RemoveAt(0);
+                            }
+                        }
+                    }
                 });
             }
             catch (Exception ex)
             {
-                Dispatcher.Invoke(() => MessageBox.Show($"Error de lectura: {ex.Message}"));
+                Dispatcher.Invoke(() =>
+                {
+                    txtMonitor.AppendText($"[Error]: {ex.Message}" + Environment.NewLine);
+                    txtMonitor.ScrollToEnd();
+                });
             }
         }
 
@@ -112,24 +163,30 @@ namespace Serial_Monitor_App
         {
             if (serialPort != null && serialPort.IsOpen)
             {
-                string command = txtCommand.Text;
+                string command = txtCommand.Text.Trim();    // Elimina espacios en blanco
                 if (!string.IsNullOrWhiteSpace(command))
                 {
-                    serialPort.WriteLine(command);
-                    txtMonitor.AppendText("[You]: " + command + Environment.NewLine);
-                    txtMonitor.ScrollToEnd();
-                    txtCommand.Clear();
+                    try
+                    {
+                        serialPort.WriteLine(command);
+                        txtMonitor.AppendText("[You]: " + command + Environment.NewLine);
+                        txtMonitor.ScrollToEnd();
+                        txtCommand.Clear();
+                    }
+                    catch (Exception ex)
+                    {
+                        txtMonitor.AppendText($"[Error]: {ex.Message}" + Environment.NewLine);
+                        txtMonitor.ScrollToEnd();
+                    }
                 }
+                else MessageBox.Show("El mensaje no puede estar vacío");
             }
-            else
-            {
-                MessageBox.Show("No hay conexión con el puerto serial.");
-            }
+            else MessageBox.Show("No hay conexión con el puerto serial.");
         }
 
-        // Para limpiar el texto del textbox al hacer clic en él
         private void txtCommand_GotFocus(object sender, RoutedEventArgs e)
         {
+            // Para limpiar el texto del textbox al hacer clic en él
             txtCommand.Clear(); 
         }
 
@@ -143,15 +200,15 @@ namespace Serial_Monitor_App
                     {
                         serialPort.Close();     // Cierra el puerto serie si está abierto
                     }
-                    // serialPort.Dispose();       // Libera los recursos del puerto serie
+                    serialPort.Dispose();       // Libera los recursos del puerto serie
                 }
             } 
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cerrar el puerto: {ex.Message}");
             }
-            
         }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
