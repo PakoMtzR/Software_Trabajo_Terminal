@@ -22,9 +22,7 @@ namespace Serial_Monitor_App
     {
         private SerialPort serialPort;
         public SeriesCollection ChartSeries { get; set; }
-
         public string[] baudrate_options { get; set; } 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -34,7 +32,7 @@ namespace Serial_Monitor_App
             baudrateComboBox.SelectedIndex = 6;
 
             ChartSeries = new SeriesCollection();
-
+            chartControl.Series = ChartSeries;
             DataContext = this;
         }
 
@@ -92,7 +90,7 @@ namespace Serial_Monitor_App
             }
             else
             {
-                serialPort.Close();
+                await Task.Run(() => serialPort.Close());
 
                 // Cambios en la interfaz
                 toggleConnectionBtn.Content = "Connect";
