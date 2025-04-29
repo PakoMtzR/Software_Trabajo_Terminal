@@ -10,61 +10,170 @@ namespace tkdScoreboard.Models
 {
     public class Match : INotifyPropertyChanged
     {
+        // Enumeración para el estado del combate
+        public enum MatchStateEnum
+        {
+            Pausa,
+            Combate,
+            Descanso
+        }
+
+        //  Evento para notificar cambios en las propiedades
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // Atributos privados
         private Timer _timer;
-        private int _roundTime = 120; // 2 minutos por defecto
+        private int _round = 1;
+        private MatchStateEnum _matchState = MatchStateEnum.Pausa;
+        private int _roundTime = 5; // 2 minutos por defecto
+        private int _restTime = 3;  // segundos de descanso por defecto
 
         public Player Player1 { get; }
         public Player Player2 { get; }
-        public int Round { get; set; } = 1;
+
+        // Propiedades públicas
+        public int Round
+        {
+            get => _round;
+            set
+            {
+                if (_round != value)
+                {
+                    _round = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(RoundDisplay));    // Notificar cambio en la visualización
+                }
+            }
+        }
 
         public int RoundTime
         {
             get => _roundTime;
             set
             {
-                _roundTime = value;
-                OnPropertyChanged();
+                if (_roundTime != value)
+                {
+                    _roundTime = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
+        public int RestTime
+        {
+            get => _restTime;
+            set
+            {
+                if (_restTime != value)
+                {
+                    _restTime = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public MatchStateEnum MatchState
+        {
+            get => _matchState;
+            set
+            {
+                if (_matchState != value)
+                {
+                    _matchState = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // Propiedades de visualización
+        public string RoundDisplay => $"R{Round}";
         public string TimerDisplay =>
             $"{_timer?.RemainingTime / 60:00}:{_timer?.RemainingTime % 60:00}";
 
+        // Propiedad para verificar si el temporizador está en ejecución
         public bool IsTimerRunning => _timer?.IsRunning ?? false;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        // Constructor
         public Match()
         {
-            Player1 = new Player { Name = "Jugador Rojo" };
-            Player2 = new Player { Name = "Jugador Azul" };
+            Player1 = new Player { Name = "CHUNG" };
+            Player2 = new Player { Name = "HONG" };
             _timer = new Timer(RoundTime);
-            _timer.TimeElapsed += (sender, e) => OnPropertyChanged(nameof(TimerDisplay));
+            _timer.TimeElapsed += (sender, e) =>
+            {
+                OnPropertyChanged(nameof(TimerDisplay));
+                if (_timer.RemainingTime <= 0)
+                {
+                    if (MatchState == MatchStateEnum.Combate)
+                    {
+                        if (Round < 3)
+                        {
+                            StartRest();
+                        }
+                        else
+                        {
+                            PauseRound();
+                            // Aquí podemos manejar el final del combate
+                            System.Windows.MessageBox.Show("Fin del combate");
+                        }
+                    }
+                    else
+                    {
+                        NextRound();
+                    }
+                }
+            };
         }
 
-        // Métodos del temporizador
-        public void StartTimer()
-        {
-            _timer.Start();
-            OnPropertyChanged(nameof(IsTimerRunning));
-        }
-
-        public void StopTimer()
-        {
-            _timer.Stop();
-            OnPropertyChanged(nameof(IsTimerRunning));
-        }
-
-        public void ResetTimer()
+        public void ResetRound()
         {
             _timer.Reset(RoundTime);
+            Player1.ResetScore();
+            Player2.ResetScore();
+            PauseRound();
             OnPropertyChanged(nameof(TimerDisplay));
-            OnPropertyChanged(nameof(IsTimerRunning));
         }
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public void PauseRound()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _timer.Pause();
+            MatchState = MatchStateEnum.Pausa;
+            // OnPropertyChanged(nameof(IsTimerRunning));
+        }
+        public void ResumeRound()
+        {
+            _timer.Start();
+            MatchState = MatchStateEnum.Combate;
+            // OnPropertyChanged(nameof(IsTimerRunning));
+        }
+        public void NextRound()
+        {
+            if (Round < 3)
+            {
+                Round++;
+                ResetRound();
+            }
+            else
+            {
+                // Aquí podemos manejar el final del combate
+                System.Windows.MessageBox.Show("Fin del combate");
+            }
+        }
+        public void ResetMatch()
+        {
+            Round = 1;
+            Player1.Reset();
+            Player2.Reset();
+            ResetRound();
+        }
+        public void StartRest()
+        {
+            _timer.Reset(RestTime);
+            MatchState = MatchStateEnum.Descanso;
+            _timer.Start();
         }
     }
 }

@@ -10,19 +10,44 @@ namespace tkdScoreboard.Models
 {
     public class Player : INotifyPropertyChanged
     {
+        //  Evento para notificar cambios en las propiedades
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // Atributos privados
+        private string _name;
         private int _points;
         private int _penalties;
+        private int _wonRounds;
 
-        public string Name { get; set; }
-
+        // Propiedades públicas
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public int Points
         {
             get => _points;
             private set
             {
-                _points = value;
-                OnPropertyChanged();
+                if (_points != value)
+                {
+                    _points = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -31,16 +56,25 @@ namespace tkdScoreboard.Models
             get => _penalties;
             private set
             {
-                _penalties = value;
-                OnPropertyChanged();
+                if (_penalties != value)
+                {
+                    _penalties = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public int WonRounds
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get => _wonRounds;
+            set
+            {
+                if (_wonRounds != value)
+                {
+                    _wonRounds = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         // Métodos para modificar puntuación
@@ -56,6 +90,7 @@ namespace tkdScoreboard.Models
                 Points = Math.Max(0, Points - points);
         }
 
+        // Metodos para modficar penalizaciones
         public void AddPenalty()
         {
             Penalties++;
@@ -66,11 +101,16 @@ namespace tkdScoreboard.Models
             Penalties = Math.Max(0, Penalties - 1);
         }
 
+        // Metodo para reiniciar el puntaje y las penalizaciones
+        public void Reset()
+        {
+            WonRounds = 0;
+            ResetScore();
+        }
         public void ResetScore()
         {
             Points = 0;
             Penalties = 0;
         }
-
     }
 }

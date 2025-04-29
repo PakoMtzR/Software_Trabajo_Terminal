@@ -14,19 +14,56 @@ namespace tkdScoreboard.ViewModels
     {
         public Match CurrentMatch { get; }
 
-        public ICommand saludarCommand { get; }
+        // Propiedades expuestas para la vista
+        public string TimerDisplay => CurrentMatch.TimerDisplay;
+        public string RoundDisplay => CurrentMatch.RoundDisplay;
 
-        public ScoreboardViewModel() 
-        { 
-            // CurrentMatch = new Match();
+        // Comandos
+        public ICommand ResumeRoundCommand { get; }
+        public ICommand PauseRoundCommand { get; }
+        public ICommand NextRoundCommand { get; }
+        public ICommand ResetMatchCommand { get; }
 
-            saludarCommand = new RelayCommand(Saludar);
+
+        public ScoreboardViewModel()
+        {
+            CurrentMatch = new Match();
+
+            // Configuramos los comandos
+            ResumeRoundCommand = new RelayCommand(CurrentMatch.ResumeRound, CanResumeRound);
+            PauseRoundCommand = new RelayCommand(CurrentMatch.PauseRound, CanPauseRound);
+            NextRoundCommand = new RelayCommand(CurrentMatch.NextRound, CanNextRound);
+            ResetMatchCommand = new RelayCommand(CurrentMatch.ResetMatch);
+
+            CurrentMatch.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(CurrentMatch.TimerDisplay))
+                    OnPropertyChanged(nameof(TimerDisplay));
+                if (e.PropertyName == nameof(CurrentMatch.RoundDisplay))
+                    OnPropertyChanged(nameof(RoundDisplay));
+            };
         }
 
-        private void Saludar()
+        private bool CanResumeRound()
         {
-            Console.WriteLine("hola");
-            System.Windows.MessageBox.Show("Hola");
+            return CurrentMatch.MatchState == Match.MatchStateEnum.Pausa;
+        }
+        private bool CanPauseRound()
+        {
+            return CurrentMatch.MatchState == Match.MatchStateEnum.Combate;
+        }
+        private bool CanNextRound()
+        {
+            return CurrentMatch.MatchState == Match.MatchStateEnum.Descanso;
+        }
+
+        private bool CanStartTimer()
+        {
+            return !CurrentMatch.IsTimerRunning;
+        }
+        private bool CanStopTimer()
+        {
+            return CurrentMatch.IsTimerRunning;
         }
     }
 }

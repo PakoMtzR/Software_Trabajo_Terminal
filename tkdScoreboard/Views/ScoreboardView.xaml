@@ -6,41 +6,45 @@
              xmlns:local="clr-namespace:tkdScoreboard.Views"
              xmlns:viewmodels="clr-namespace:tkdScoreboard.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             Focusable="True">
 
-    <UserControl.Resources>
-        <viewmodels:ScoreboardViewModel x:Key="scoreboard"/>
-    </UserControl.Resources>
+    <UserControl.DataContext>
+        <viewmodels:ScoreboardViewModel/>
+    </UserControl.DataContext>
 
-    <Grid
-        DataContext="{Binding Source={StaticResource scoreboard}}"
-        Background="Black">
-        
+    <Grid Background="Black">
+
+        <Grid.InputBindings>
+            <KeyBinding Key="Q" Command="{Binding ResumeRoundCommand}"/>
+            <KeyBinding Key="W" Command="{Binding PauseRoundCommand}"/>
+        </Grid.InputBindings>
+
+        <!-- Definimos filas y columnas del marcador -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+        
+        <!-- Menu de barra -->
         <Menu IsMainMenu="True" VerticalAlignment="Top" Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Header="Inicio">
                 <MenuItem Header="Nuevo Combate"/>
                 <MenuItem Header="Ajustes"/>
             </MenuItem>
             <MenuItem Header="Combate">
-                <MenuItem Header="Iniciar Combate" Command="{Binding saludarCommand}"/>
-                <MenuItem Header="Pausar/Reanudar Combate"/>
+                <MenuItem Header="Iniciar/Reanudar Combate" Command="{Binding ResumeRoundCommand}"/>
+                <MenuItem Header="Pausar Combate" Command="{Binding PauseRoundCommand}"/>
                 <MenuItem Header="Video Replay"/>
-                <MenuItem Header="Tiempo Medico"/>
                 <MenuItem Header="Modificar Marcador"/>
                 <MenuItem Header="Finalizar Round"/>
-                <MenuItem Header="Siguiente Round"/>
-                <MenuItem Header="Finalizar Combate"/>
+                <MenuItem Header="Siguiente Round" Command="{Binding NextRoundCommand}"/>
+                <MenuItem Header="Finalizar Combate" Command="{Binding ResetMatchCommand}"/>
             </MenuItem>
             <MenuItem Header="Dispositivos">
                 <MenuItem Header="Puerto"/>
@@ -54,7 +58,8 @@
                 <MenuItem Header="Monitor Serial"/>
             </MenuItem>
         </Menu>
-
+        
+        <!-- Panel central -->
         <Grid Grid.Column="1" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -65,14 +70,12 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="VS" Grid.Row="0" FontSize="30"/>
-            <TextBlock Text="R1" Grid.Row="1" FontSize="30"/>
-            <TextBlock Text="1:00" Grid.Row="2" FontSize="70"/>
-            <TextBlock Text="Esperando" Grid.Row="3"/>
-            <!--
-            <Button Content="Hola" Command="{Binding saludarCommand}"></Button>
-            -->
+            <TextBlock Text="{Binding RoundDisplay}" Grid.Row="1" FontSize="30"/>
+            <TextBlock Text="{Binding TimerDisplay}" Grid.Row="2" FontSize="70"/>
+            <TextBlock Text="{Binding CurrentMatch.MatchState}" Grid.Row="3"/>
         </Grid>
-
+        
+        <!-- Panel Izquierdo (Jugador Azul) -->
         <Border Grid.Column="0" Grid.Row="1" Background="Blue">
             <Grid>
                 <Grid.RowDefinitions>
@@ -90,12 +93,12 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Chung" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
-                <TextBlock Text="10" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
-
+                <TextBlock Text="{Binding CurrentMatch.Player1.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.Points}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
             </Grid>
         </Border>
-
+        
+        <!-- Panel Derecho (Jugador Rojo) -->
         <Border Grid.Column="2" Grid.Row="1" Background="Red">
             <Grid>
                 <Grid.RowDefinitions>
@@ -113,9 +116,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Hong" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
-                <TextBlock Text="10" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
-                
+                <TextBlock Text="{Binding CurrentMatch.Player2.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.Points}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
             </Grid>
         </Border>
     </Grid>

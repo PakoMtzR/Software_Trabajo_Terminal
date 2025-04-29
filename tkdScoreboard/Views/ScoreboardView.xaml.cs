@@ -23,6 +23,16 @@ namespace tkdScoreboard.Views
         public ScoreboardView()
         {
             InitializeComponent();
+            Loaded += (s, e) =>
+            {
+                Focus();
+                Keyboard.Focus(this);
+            };
+
+            this.KeyDown += (s, e) =>
+            {
+                MessageBox.Show($"Tecla presionada: {e.Key}");
+            };
         }
     }
 }

@@ -1,40 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace tkdScoreboard.Models
 {
-    public class Timer
+    public class Timer : INotifyPropertyChanged
     {
+        // Atributos privados
         private readonly System.Timers.Timer _timer;
+        private int _remainingTime;
+        private bool _isRunning;
 
-        public int RemainingTime { get; private set; }
-        public bool IsRunning { get; private set; }
-        public event ElapsedEventHandler TimeElapsed;
-
-        public Timer(int seconds)
+        //  Evento para notificar cambios en las propiedades
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            RemainingTime = seconds;
-            _timer = new System.Timers.Timer(1000);
-            _timer.Elapsed += OnTimerElapsed;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public event ElapsedEventHandler TimeElapsed;
+
+        // Propiedades públicas
+        public int RemainingTime
+        {
+            get => _remainingTime;
+            private set
+            {
+                if (_remainingTime != value)
+                {
+                    _remainingTime = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsRunning
+        {
+            get => _isRunning;
+            private set
+            {
+                if (_isRunning != value)
+                {
+                    _isRunning = value ? true : false;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // Constructor
+        public Timer(int seconds)
+        {
+            if (seconds < 0)
+                throw new ArgumentOutOfRangeException(nameof(seconds), "El tiempo no puede ser negativo.");
+
+            RemainingTime = seconds;
+            _timer = new System.Timers.Timer(1000);     
+            _timer.Elapsed += OnTimerElapsed;           // Se ejecuta cada segundo
+        }
+
+        // Método que se ejecuta cada segundo
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             RemainingTime--;
             TimeElapsed?.Invoke(this, e);
 
             if (RemainingTime <= 0)
+            {
                 Stop();
+            }
         }
 
+        // Métodos para iniciar, detener, pausar y reiniciar el temporizador
         public void Start()
         {
-            _timer.Start();
-            IsRunning = true;
+            if (RemainingTime > 0)
+            {
+                _timer.Start();
+                IsRunning = true;
+            }
         }
 
         public void Stop()
@@ -43,8 +91,16 @@ namespace tkdScoreboard.Models
             IsRunning = false;
         }
 
+        public void Pause()
+        {
+            Stop();
+        }
+
         public void Reset(int seconds)
         {
+            if (seconds < 0)
+                throw new ArgumentOutOfRangeException(nameof(seconds), "El tiempo no puede ser negativo.");
+
             Stop();
             RemainingTime = seconds;
         }
