@@ -110,7 +110,8 @@ namespace tkdScoreboard.Models
                 {
                     if (MatchState == MatchStateEnum.Combate)
                     {
-                        if (Round < 3)
+                        SelectRoundWinner();
+                        if (Round < 3 && ( Player1.WonRounds < 1 || Player2.WonRounds < 1) )
                         {
                             StartRest();
                         }
@@ -127,6 +128,28 @@ namespace tkdScoreboard.Models
                     }
                 }
             };
+        }
+
+        public void SelectRoundWinner()
+        {
+            if (Player1.Points > Player2.Points)
+            {
+                Player1.WonRounds++;
+            }
+            else if (Player2.Points > Player1.Points)
+            {
+                Player2.WonRounds++;
+            }
+            else
+            {
+                // Empate, no se incrementa el contador de rondas ganadas
+            }
+        }
+
+        public void PenalizePlayer(Player player1, Player player2)
+        {
+            player1.AddPenalty();
+            player2.AddPoints(1);
         }
 
         public void ResetRound()

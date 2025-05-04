@@ -13,13 +13,27 @@
         <viewmodels:ScoreboardViewModel/>
     </UserControl.DataContext>
 
+    <UserControl.InputBindings>
+        <!-- Atajos para el judador 1 -->
+        <KeyBinding Key="Q" Command="{Binding Add1PointToPlayer1Command}"/>
+        <KeyBinding Key="W" Command="{Binding Add2PointsToPlayer1Command}"/>
+        <KeyBinding Key="E" Command="{Binding Add3PointsToPlayer1Command}"/>
+        <KeyBinding Key="R" Command="{Binding Add4PointsToPlayer1Command}"/>
+        <KeyBinding Key="T" Command="{Binding Add5PointsToPlayer1Command}"/>
+        
+        <!-- Atajos para el jugador 2 -->
+        <KeyBinding Key="P" Command="{Binding Add1PointToPlayer2Command}"/>
+        <KeyBinding Key="O" Command="{Binding Add2PointsToPlayer2Command}"/>
+        <KeyBinding Key="I" Command="{Binding Add3PointsToPlayer2Command}"/>
+        <KeyBinding Key="U" Command="{Binding Add4PointsToPlayer2Command}"/>
+        <KeyBinding Key="Y" Command="{Binding Add5PointsToPlayer2Command}"/>
+        
+        <!-- Atajos para el timer -->
+        <KeyBinding Key="A" Command="{Binding ResumeRoundCommand}"/>
+        <KeyBinding Key="S" Command="{Binding PauseRoundCommand}"/>
+    </UserControl.InputBindings>
+
     <Grid Background="Black">
-
-        <Grid.InputBindings>
-            <KeyBinding Key="Q" Command="{Binding ResumeRoundCommand}"/>
-            <KeyBinding Key="W" Command="{Binding PauseRoundCommand}"/>
-        </Grid.InputBindings>
-
         <!-- Definimos filas y columnas del marcador -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -69,10 +83,10 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="VS" Grid.Row="0" FontSize="30"/>
-            <TextBlock Text="{Binding RoundDisplay}" Grid.Row="1" FontSize="30"/>
-            <TextBlock Text="{Binding TimerDisplay}" Grid.Row="2" FontSize="70"/>
-            <TextBlock Text="{Binding CurrentMatch.MatchState}" Grid.Row="3"/>
+            <TextBlock Text="VS" Grid.Row="0"/>
+            <TextBlock Text="{Binding RoundDisplay}" Grid.Row="1"/>
+            <TextBlock Text="{Binding TimerDisplay}" Grid.Row="2" FontSize="130" Grid.RowSpan="2"/>
+            <TextBlock Text="{Binding CurrentMatch.MatchState}" Grid.Row="4" FontSize="50"/>
         </Grid>
         
         <!-- Panel Izquierdo (Jugador Azul) -->
@@ -80,6 +94,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
@@ -93,8 +108,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding CurrentMatch.Player1.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
-                <TextBlock Text="{Binding CurrentMatch.Player1.Points}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.Points}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="300"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.WonRounds}" Grid.Column="2" Grid.Row="1"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.Penalties}" Grid.Column="0" Grid.Row="3" Foreground="Yellow"/>
             </Grid>
         </Border>
         
@@ -103,6 +120,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
@@ -116,8 +134,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding CurrentMatch.Player2.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" FontSize="40"/>
-                <TextBlock Text="{Binding CurrentMatch.Player2.Points}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="180"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.Points}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="320"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.WonRounds}" Grid.Column="2" Grid.Row="1"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.Penalties}" Grid.Column="4" Grid.Row="3" Foreground="Yellow"/>
             </Grid>
         </Border>
     </Grid>

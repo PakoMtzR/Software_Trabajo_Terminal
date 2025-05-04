@@ -20,9 +20,9 @@ namespace tkdScoreboard.Models
 
         // Atributos privados
         private string _name;
-        private int _points;
-        private int _penalties;
-        private int _wonRounds;
+        private int _points = 0;
+        private int _penalties = 0;
+        private int _wonRounds = 0;
 
         // Propiedades públicas
         public string Name
