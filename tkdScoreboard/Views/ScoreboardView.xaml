@@ -15,22 +15,36 @@
 
     <UserControl.InputBindings>
         <!-- Atajos para el judador 1 -->
-        <KeyBinding Key="Q" Command="{Binding Add1PointToPlayer1Command}"/>
-        <KeyBinding Key="W" Command="{Binding Add2PointsToPlayer1Command}"/>
-        <KeyBinding Key="E" Command="{Binding Add3PointsToPlayer1Command}"/>
-        <KeyBinding Key="R" Command="{Binding Add4PointsToPlayer1Command}"/>
-        <KeyBinding Key="T" Command="{Binding Add5PointsToPlayer1Command}"/>
-        
+        <KeyBinding Key="D1" Command="{Binding Add1PointToPlayer1Command}"/>
+        <KeyBinding Key="D2" Command="{Binding Add2PointsToPlayer1Command}"/>
+        <KeyBinding Key="D3" Command="{Binding Add3PointsToPlayer1Command}"/>
+        <KeyBinding Key="D4" Command="{Binding Add4PointsToPlayer1Command}"/>
+        <KeyBinding Key="D5" Command="{Binding Add5PointsToPlayer1Command}"/>
+        <KeyBinding Key="Q" Command="{Binding Remove1PointToPlayer1Command}"/>
+        <KeyBinding Key="W" Command="{Binding Remove2PointsToPlayer1Command}"/>
+        <KeyBinding Key="E" Command="{Binding Remove3PointsToPlayer1Command}"/>
+        <KeyBinding Key="R" Command="{Binding Remove4PointsToPlayer1Command}"/>
+        <KeyBinding Key="T" Command="{Binding Remove5PointsToPlayer1Command}"/>
+        <KeyBinding Key="F" Command="{Binding AddPenaltyToPlayer1Command}"/>
+        <KeyBinding Key="D" Command="{Binding RemovePenaltyToPlayer1Command}"/>
+
         <!-- Atajos para el jugador 2 -->
-        <KeyBinding Key="P" Command="{Binding Add1PointToPlayer2Command}"/>
-        <KeyBinding Key="O" Command="{Binding Add2PointsToPlayer2Command}"/>
-        <KeyBinding Key="I" Command="{Binding Add3PointsToPlayer2Command}"/>
-        <KeyBinding Key="U" Command="{Binding Add4PointsToPlayer2Command}"/>
-        <KeyBinding Key="Y" Command="{Binding Add5PointsToPlayer2Command}"/>
-        
+        <KeyBinding Key="D0" Command="{Binding Add1PointToPlayer2Command}"/>
+        <KeyBinding Key="D9" Command="{Binding Add2PointsToPlayer2Command}"/>
+        <KeyBinding Key="D8" Command="{Binding Add3PointsToPlayer2Command}"/>
+        <KeyBinding Key="D7" Command="{Binding Add4PointsToPlayer2Command}"/>
+        <KeyBinding Key="D6" Command="{Binding Add5PointsToPlayer2Command}"/>
+        <KeyBinding Key="P" Command="{Binding Remove1PointToPlayer2Command}"/>
+        <KeyBinding Key="O" Command="{Binding Remove2PointsToPlayer2Command}"/>
+        <KeyBinding Key="I" Command="{Binding Remove3PointsToPlayer2Command}"/>
+        <KeyBinding Key="U" Command="{Binding Remove4PointsToPlayer2Command}"/>
+        <KeyBinding Key="Y" Command="{Binding Remove5PointsToPlayer2Command}"/>
+        <KeyBinding Key="J" Command="{Binding AddPenaltyToPlayer2Command}"/>
+        <KeyBinding Key="K" Command="{Binding RemovePenaltyToPlayer2Command}"/>
+
         <!-- Atajos para el timer -->
-        <KeyBinding Key="A" Command="{Binding ResumeRoundCommand}"/>
-        <KeyBinding Key="S" Command="{Binding PauseRoundCommand}"/>
+        <KeyBinding Key="G" Command="{Binding ResumeRoundCommand}"/>
+        <KeyBinding Key="H" Command="{Binding PauseRoundCommand}"/>
     </UserControl.InputBindings>
 
     <Grid Background="Black">
@@ -48,28 +62,23 @@
         <!-- Menu de barra -->
         <Menu IsMainMenu="True" VerticalAlignment="Top" Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Header="Inicio">
-                <MenuItem Header="Nuevo Combate"/>
-                <MenuItem Header="Ajustes"/>
-            </MenuItem>
-            <MenuItem Header="Combate">
                 <MenuItem Header="Iniciar/Reanudar Combate" Command="{Binding ResumeRoundCommand}"/>
                 <MenuItem Header="Pausar Combate" Command="{Binding PauseRoundCommand}"/>
-                <MenuItem Header="Video Replay"/>
                 <MenuItem Header="Modificar Marcador"/>
-                <MenuItem Header="Finalizar Round"/>
+                <MenuItem Header="Finalizar Round" Command="{Binding FinishRoundCommand}"/>
                 <MenuItem Header="Siguiente Round" Command="{Binding NextRoundCommand}"/>
-                <MenuItem Header="Finalizar Combate" Command="{Binding ResetMatchCommand}"/>
+                <MenuItem Header="Nuevo/Finalizar Combate" Command="{Binding ResetMatchCommand}"/>
+                <MenuItem Header="Ajustes"/>
             </MenuItem>
             <MenuItem Header="Dispositivos">
-                <MenuItem Header="Puerto"/>
-                <MenuItem Header="BaudRate">
-                    <MenuItem Header="9600"/>
-                    <MenuItem Header="9600"/>
-                    <MenuItem Header="9600"/>
-                    <MenuItem Header="9600"/>
-                </MenuItem>
-                <MenuItem Header="Test"/>
-                <MenuItem Header="Monitor Serial"/>
+                <MenuItem Header="Conectar"/>
+                <MenuItem Header="Desconectar"/>
+            </MenuItem>
+            <MenuItem Header="Camara">
+                <MenuItem Header="Iniciar Grabacion"/>
+                <MenuItem Header="Detener Grabacion"/>
+                <MenuItem Header="Pausar Grabacion"/>
+                <MenuItem Header="VideoReplay"/>
             </MenuItem>
         </Menu>
         

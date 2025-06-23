@@ -84,7 +84,7 @@ namespace tkdScoreboard.Models
                 Points += points;
         }
 
-        public void DeductPoints(int points)
+        public void RemovePoints(int points)
         {
             if (points > 0)
                 Points = Math.Max(0, Points - points);

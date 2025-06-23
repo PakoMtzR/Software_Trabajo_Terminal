@@ -29,7 +29,7 @@ namespace tkdScoreboard.Models
         public int RemainingTime
         {
             get => _remainingTime;
-            private set
+            set
             {
                 if (_remainingTime != value)
                 {
@@ -66,13 +66,12 @@ namespace tkdScoreboard.Models
         // Método que se ejecuta cada segundo
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            RemainingTime--;
-            TimeElapsed?.Invoke(this, e);
-
-            if (RemainingTime <= 0)
+            if (RemainingTime > 0)
             {
-                Stop();
+                RemainingTime--;
+                TimeElapsed?.Invoke(this, e);
             }
+            else Stop();
         }
 
         // Métodos para iniciar, detener, pausar y reiniciar el temporizador

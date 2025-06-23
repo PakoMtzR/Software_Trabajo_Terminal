@@ -23,7 +23,6 @@ namespace tkdScoreboard.Views
         public ScoreboardView()
         {
             InitializeComponent();
-            // Loaded += (s, e) => FocusCapture.Focus();
             Loaded += (s, e) =>
             {
                 Focus();

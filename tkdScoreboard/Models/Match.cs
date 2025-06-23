@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
 
 namespace tkdScoreboard.Models
 {
@@ -31,6 +33,7 @@ namespace tkdScoreboard.Models
         private MatchStateEnum _matchState = MatchStateEnum.Pausa;
         private int _roundTime = 5; // 2 minutos por defecto
         private int _restTime = 3;  // segundos de descanso por defecto
+        private int _penaltiesLimit = 5;
 
         public Player Player1 { get; }
         public Player Player2 { get; }
@@ -76,6 +79,18 @@ namespace tkdScoreboard.Models
             }
         }
 
+        public int PenaltiesLimit
+        {
+            get => _penaltiesLimit;
+            set
+            {
+                if(_penaltiesLimit != value)
+                {
+                    _penaltiesLimit = value;
+                }
+            }
+        }
+
         public MatchStateEnum MatchState
         {
             get => _matchState;
@@ -108,18 +123,19 @@ namespace tkdScoreboard.Models
                 OnPropertyChanged(nameof(TimerDisplay));
                 if (_timer.RemainingTime <= 0)
                 {
+                    _timer.Stop();
                     if (MatchState == MatchStateEnum.Combate)
                     {
                         SelectRoundWinner();
-                        if (Round < 3 && ( Player1.WonRounds < 1 || Player2.WonRounds < 1) )
-                        {
-                            StartRest();
-                        }
-                        else
+                        if (Player1.WonRounds >= 2 || Player2.WonRounds >= 2) 
                         {
                             PauseRound();
                             // Aquí podemos manejar el final del combate
                             System.Windows.MessageBox.Show("Fin del combate");
+                        }
+                        else
+                        {
+                            StartRest();
                         }
                     }
                     else
@@ -135,21 +151,64 @@ namespace tkdScoreboard.Models
             if (Player1.Points > Player2.Points)
             {
                 Player1.WonRounds++;
+                return;
             }
-            else if (Player2.Points > Player1.Points)
+            if (Player2.Points > Player1.Points)
             {
                 Player2.WonRounds++;
+                return;
+            }
+            if (Player1.Penalties > Player2.Penalties)
+            {
+                Player2.WonRounds++;
+                return;
+            }
+            if (Player2.Penalties > Player1.Penalties)
+            {
+                Player1.WonRounds++;
+                return;
+            }
+
+            // Empate total, pedir decisión al usuario
+            DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    "Azul - Yes]\nRojo - No]",
+                    "Selecciona Ganador del Round",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+            // Procesar la respuesta
+            if (result == System.Windows.Forms.DialogResult.Yes)
+            {
+                System.Windows.Forms.MessageBox.Show("Gana Azul por decisión");
+                Player1.WonRounds++;
             }
             else
             {
-                // Empate, no se incrementa el contador de rondas ganadas
+                System.Windows.Forms.MessageBox.Show("Gana Rojo por decisión");
+                Player2.WonRounds++;
             }
         }
 
-        public void PenalizePlayer(Player player1, Player player2)
+        public void PenalizePlayer1()
         {
-            player1.AddPenalty();
-            player2.AddPoints(1);
+            Player1.AddPenalty();
+            Player2.AddPoints(1);
+        }
+        public void DespenalizePlayer1()
+        {
+            Player1.RemovePenalty();
+            Player2.RemovePoints(1);
+        }
+
+        public void PenalizePlayer2()
+        {
+            Player2.AddPenalty();
+            Player1.AddPoints(1);
+        }
+        public void DespenalizePlayer2()
+        {
+            Player2.RemovePenalty();
+            Player1.RemovePoints(1);
         }
 
         public void ResetRound()
@@ -172,18 +231,15 @@ namespace tkdScoreboard.Models
             MatchState = MatchStateEnum.Combate;
             // OnPropertyChanged(nameof(IsTimerRunning));
         }
+        public void FinishRound()
+        {
+            if (MatchState != MatchStateEnum.Descanso)
+                _timer.RemainingTime = 0;
+        }
         public void NextRound()
         {
-            if (Round < 3)
-            {
-                Round++;
-                ResetRound();
-            }
-            else
-            {
-                // Aquí podemos manejar el final del combate
-                System.Windows.MessageBox.Show("Fin del combate");
-            }
+            Round++;
+            ResetRound();
         }
         public void ResetMatch()
         {
