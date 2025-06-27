@@ -7,14 +7,19 @@ using System.Windows.Input;
 using tkdScoreboard.Commands;
 using tkdScoreboard.Models;
 using tkdScoreboard.Services;
+using tkdScoreboard.Services.Interfaces;
 
 namespace tkdScoreboard.ViewModels
 {
-    internal class ScoreboardViewModel : BaseViewModel
+    public class ScoreboardViewModel : BaseViewModel
     {
         public Match CurrentMatch { get; }
         private SerialConnection _serialConnection;
         public string ReceivedData { get; set; }
+        private readonly IDialogService _dialogService;
+
+        // Commandos para abrir ventanas flotantes
+        public ICommand OpenSettingsCommand { get; }
 
         // Propiedades expuestas para la vista
         public string TimerDisplay => CurrentMatch.TimerDisplay;
@@ -64,23 +69,21 @@ namespace tkdScoreboard.ViewModels
         public ICommand AddPenaltyToPlayer2Command { get; }
         public ICommand RemovePenaltyToPlayer2Command { get; }
 
+        // Comandos para la conexión serial
+        public ICommand ConnectSerialCommand { get; }
+        public ICommand DisconnectSerialCommand { get; }
 
         // Constructor
-        public ScoreboardViewModel()
+        public ScoreboardViewModel(IDialogService dialogService)
         {
             // Inicializamos el modelo
             CurrentMatch = new Match();
+            _dialogService = dialogService;
             _serialConnection = new SerialConnection("COM3", 115200);
             _serialConnection.DataReceived += OnDataReceived;
 
-            try
-            {
-                _serialConnection.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al abrir el puerto serial: {ex.Message}");
-            }
+            // Configuramos los comandos para abrir ventanas flotantes
+            OpenSettingsCommand = new RelayCommand(OpenSettings);
 
             // Configuramos los comandos del timer
             ResumeRoundCommand = new RelayCommand(CurrentMatch.ResumeRound, CanResumeRound);
@@ -88,6 +91,10 @@ namespace tkdScoreboard.ViewModels
             NextRoundCommand = new RelayCommand(CurrentMatch.NextRound, CanNextRound);
             ResetMatchCommand = new RelayCommand(CurrentMatch.ResetMatch);
             FinishRoundCommand = new RelayCommand(CurrentMatch.FinishRound);
+
+            // Comandos para la conexión serial
+            ConnectSerialCommand = new RelayCommand(_serialConnection.Open, () => !_serialConnection.IsOpen);
+            DisconnectSerialCommand = new RelayCommand(_serialConnection.Close, () => _serialConnection.IsOpen);
 
             // Comandos para el jugador 1
             Add1PointToPlayer1Command = new RelayCommand(() => CurrentMatch.Player1.AddPoints(1));
@@ -127,26 +134,40 @@ namespace tkdScoreboard.ViewModels
             };
         }
 
+        private void OpenSettings()
+        {
+            var settingsViewModel = new SettingsViewModel(
+            CurrentMatch.Player1.Name,
+            CurrentMatch.Player2.Name,
+            CurrentMatch.RoundTime,
+            CurrentMatch.RestTime,
+            CurrentMatch.PenaltiesLimit,
+            null); // El callback lo pone DialogService
+
+            if (_dialogService.ShowSettingsDialog(settingsViewModel))
+            {
+                // Aquí los valores ya están actualizados por DialogService
+                CurrentMatch.Player1.Name = settingsViewModel.Player1Name;
+                CurrentMatch.Player2.Name = settingsViewModel.Player2Name;
+                CurrentMatch.RoundTime = settingsViewModel.RoundTime;
+                CurrentMatch.RestTime = settingsViewModel.RestTime;
+                CurrentMatch.PenaltiesLimit = settingsViewModel.PenaltyLimit;
+            }
+        }
+
         private void OnDataReceived(string data)
         {
+            if (CurrentMatch.MatchState != Match.MatchStateEnum.Combate) 
+                return;
+
             // Actualiza la propiedad con los datos recibidos
             ReceivedData = data;
-            try
-            {
-                int dataValue = int.Parse(data.Trim());
-                if (dataValue <= 5)
-                {
-                    CurrentMatch.Player1.AddPoints(dataValue);
-                }
-                else
-                {
-                    CurrentMatch.Player2.AddPoints(dataValue - 5); // Asumiendo que los valores mayores a 5 son para el jugador 2
-                }
+            if (int.TryParse(data.Trim(), out int dataValue)) 
+            { 
+                if (dataValue <= 5) CurrentMatch.Player1.AddPoints(dataValue);
+                else CurrentMatch.Player2.AddPoints(dataValue - 5); // Asumiendo que los valores mayores a 5 son para el jugador 2
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al procesar los datos recibidos: {ex.Message}");
-            }
+            else Console.WriteLine("Error al procesar los datos recibidos.");
             OnPropertyChanged(nameof(ReceivedData));
         }
 

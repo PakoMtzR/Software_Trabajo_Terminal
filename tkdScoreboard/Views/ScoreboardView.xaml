@@ -6,12 +6,18 @@
              xmlns:local="clr-namespace:tkdScoreboard.Views"
              xmlns:viewmodels="clr-namespace:tkdScoreboard.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="1000"
              Focusable="True">
 
-    <UserControl.DataContext>
-        <viewmodels:ScoreboardViewModel/>
-    </UserControl.DataContext>
+    <!-- Cambiamos los estilos -->
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="80"/>
+        </Style>
+    </UserControl.Resources>
 
     <UserControl.InputBindings>
         <!-- Atajos para el judador 1 -->
@@ -68,14 +74,15 @@
                 <MenuItem Header="Finalizar Round" Command="{Binding FinishRoundCommand}"/>
                 <MenuItem Header="Siguiente Round" Command="{Binding NextRoundCommand}"/>
                 <MenuItem Header="Nuevo/Finalizar Combate" Command="{Binding ResetMatchCommand}"/>
-                <MenuItem Header="Ajustes"/>
+                <MenuItem Header="Ajustes" Command="{Binding OpenSettingsCommand}"/>
             </MenuItem>
             <MenuItem Header="Dispositivos">
-                <MenuItem Header="Conectar"/>
-                <MenuItem Header="Desconectar"/>
+                <MenuItem Header="Conectar" Command="{Binding ConnectSerialCommand}"/>
+                <MenuItem Header="Desconectar" Command="{Binding DisconnectSerialCommand}"/>
+                <MenuItem Header="Abrir Monitor Serial"/>
             </MenuItem>
             <MenuItem Header="Camara">
-                <MenuItem Header="Iniciar Grabacion"/>
+                <MenuItem Header="Iniciar/Reanudar Grabacion"/>
                 <MenuItem Header="Detener Grabacion"/>
                 <MenuItem Header="Pausar Grabacion"/>
                 <MenuItem Header="VideoReplay"/>
@@ -117,7 +124,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding CurrentMatch.Player1.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
+                <TextBlock Text="{Binding CurrentMatch.Player1.Name, Mode=TwoWay}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
                 <TextBlock Text="{Binding CurrentMatch.Player1.Points}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="300"/>
                 <TextBlock Text="{Binding CurrentMatch.Player1.WonRounds}" Grid.Column="2" Grid.Row="1"/>
                 <TextBlock Text="{Binding CurrentMatch.Player1.Penalties}" Grid.Column="0" Grid.Row="3" Foreground="Yellow"/>
@@ -143,7 +150,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding CurrentMatch.Player2.Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
+                <TextBlock Text="{Binding CurrentMatch.Player2.Name, Mode=TwoWay}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"/>
                 <TextBlock Text="{Binding CurrentMatch.Player2.Points}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="3" FontSize="320"/>
                 <TextBlock Text="{Binding CurrentMatch.Player2.WonRounds}" Grid.Column="2" Grid.Row="1"/>
                 <TextBlock Text="{Binding CurrentMatch.Player2.Penalties}" Grid.Column="4" Grid.Row="3" Foreground="Yellow"/>

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using tkdScoreboard.ViewModels;
 
 namespace tkdScoreboard.Views
 {
@@ -20,9 +21,12 @@ namespace tkdScoreboard.Views
     /// </summary>
     public partial class ScoreboardView : UserControl
     {
-        public ScoreboardView()
+        public ScoreboardView(ScoreboardViewModel scoreboardViewModel)
         {
             InitializeComponent();
+            DataContext = scoreboardViewModel;
+
+            // Enfoque en el teclado para los comandos
             Loaded += (s, e) =>
             {
                 Focus();

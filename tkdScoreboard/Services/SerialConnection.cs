@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Ports;
 
 namespace tkdScoreboard.Services
@@ -10,6 +6,7 @@ namespace tkdScoreboard.Services
     public class SerialConnection
     {
         private SerialPort _serialPort;
+        public bool IsOpen => _serialPort?.IsOpen ?? false;
         public event Action<string> DataReceived;
 
         public SerialConnection(string portName, int baudRate = 115200)

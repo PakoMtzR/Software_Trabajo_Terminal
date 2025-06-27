@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using tkdScoreboard.Services;
+using tkdScoreboard.ViewModels;
+using tkdScoreboard.Views;
 
 namespace tkdScoreboard
 {
@@ -23,6 +26,17 @@ namespace tkdScoreboard
         public MainWindow()
         {
             InitializeComponent();
+            // Crear instancia del servicio de diálogos
+            var dialogService = new DialogService();
+
+            // Crear instancia del ViewModel y pasar el servicio de diálogos
+            var scoreboardViewModel = new ScoreboardViewModel(dialogService);
+
+            // Crear instancia del View y pasar el ViewModel
+            var scoreboardView = new ScoreboardView(scoreboardViewModel);
+
+            // Mostrar el View en el MainWindow
+            Content = scoreboardView;
         }
     }
 }

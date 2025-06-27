@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
 
 namespace tkdScoreboard.Models
@@ -31,7 +26,7 @@ namespace tkdScoreboard.Models
         private Timer _timer;
         private int _round = 1;
         private MatchStateEnum _matchState = MatchStateEnum.Pausa;
-        private int _roundTime = 5; // 2 minutos por defecto
+        private int _roundTime = 10; // 2 minutos por defecto
         private int _restTime = 3;  // segundos de descanso por defecto
         private int _penaltiesLimit = 5;
 
@@ -171,7 +166,7 @@ namespace tkdScoreboard.Models
 
             // Empate total, pedir decisión al usuario
             DialogResult result = System.Windows.Forms.MessageBox.Show(
-                    "Azul - Yes]\nRojo - No]",
+                    "Azul - [Yes]\nRojo - [No]",
                     "Selecciona Ganador del Round",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
