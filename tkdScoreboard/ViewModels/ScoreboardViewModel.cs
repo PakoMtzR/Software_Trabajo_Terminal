@@ -8,8 +8,8 @@ using tkdScoreboard.Commands;
 using tkdScoreboard.Models;
 using tkdScoreboard.Services;
 using tkdScoreboard.Services.Interfaces;
-using Microsoft.Scripting.Hosting;
-using IronPython.Hosting;
+using System.Diagnostics;
+using System.IO;
 
 namespace tkdScoreboard.ViewModels
 {
@@ -207,9 +207,43 @@ namespace tkdScoreboard.ViewModels
 
         public void RunPythonScript()
         {
-            string scriptPath = @"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\helloWorld.py";
-            ScriptRuntime py = Python.CreateRuntime();
-            dynamic pythonProgram = py.UseFile(scriptPath);
+            // Configuración de los parámetros
+            string condaPath = @"D:\miniConda\Scripts\conda.exe"; // Ruta a conda.exe
+            string environmentName = "yolo_env"; // Nombre de tu entorno Conda
+            string pythonScriptPath = @"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\yolo_pose_1.py"; // Ruta completa al script Python
+            string scriptArguments = ""; // Argumentos para el script (opcional)
+
+            // Crear el proceso
+            ProcessStartInfo start = new ProcessStartInfo();
+            start.FileName = condaPath;
+            start.Arguments = $"run -n {environmentName} python \"{pythonScriptPath}\" {scriptArguments}";
+            start.UseShellExecute = false;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            start.CreateNoWindow = true;
+
+            // Ejecutar el proceso
+            using (Process process = Process.Start(start))
+            {
+                using (StreamReader reader = process.StandardOutput)
+                {
+                    string result = reader.ReadToEnd();
+                    Console.WriteLine(result); // Mostrar salida del script
+                }
+
+                using (StreamReader reader = process.StandardError)
+                {
+                    string error = reader.ReadToEnd();
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        Console.WriteLine("Error: " + error);
+                    }
+                }
+
+                process.WaitForExit();
+
+                // Leer json y agregar puntos 
+            }
         }
 
         private bool CanResumeRound()
