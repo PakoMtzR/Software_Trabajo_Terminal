@@ -10,6 +10,7 @@ namespace tkdScoreboard.Services.Interfaces
     public interface IDialogService
     {
         bool ShowSettingsDialog(SettingsViewModel settingsViewModel);
+        bool ShowEditScoreboardDialog(EditScoreboardViewModel editScoreboardViewModel);
     }
 
 }

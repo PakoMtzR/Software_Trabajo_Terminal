@@ -23,7 +23,7 @@ namespace tkdScoreboard.Models
         }
 
         // Atributos privados
-        private Timer _timer;
+        public Timer _timer;
         private int _round = 1;
         private MatchStateEnum _matchState = MatchStateEnum.Pausa;
         private int _roundTime = 10; // 2 minutos por defecto

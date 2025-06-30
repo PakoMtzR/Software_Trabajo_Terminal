@@ -70,7 +70,7 @@
             <MenuItem Header="Inicio">
                 <MenuItem Header="Iniciar/Reanudar Combate" Command="{Binding ResumeRoundCommand}"/>
                 <MenuItem Header="Pausar Combate" Command="{Binding PauseRoundCommand}"/>
-                <MenuItem Header="Modificar Marcador"/>
+                <MenuItem Header="Modificar Marcador" Command="{Binding OpenEditScoreboardCommand}"/>
                 <MenuItem Header="Finalizar Round" Command="{Binding FinishRoundCommand}"/>
                 <MenuItem Header="Siguiente Round" Command="{Binding NextRoundCommand}"/>
                 <MenuItem Header="Nuevo/Finalizar Combate" Command="{Binding ResetMatchCommand}"/>
@@ -82,6 +82,7 @@
                 <MenuItem Header="Abrir Monitor Serial"/>
             </MenuItem>
             <MenuItem Header="Camara">
+                <MenuItem Header="Ejecutar Script Python" Command="{Binding RunPythonScriptCommand}"/>
                 <MenuItem Header="Iniciar/Reanudar Grabacion"/>
                 <MenuItem Header="Detener Grabacion"/>
                 <MenuItem Header="Pausar Grabacion"/>

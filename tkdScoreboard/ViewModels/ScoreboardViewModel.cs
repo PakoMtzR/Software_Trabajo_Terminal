@@ -8,6 +8,8 @@ using tkdScoreboard.Commands;
 using tkdScoreboard.Models;
 using tkdScoreboard.Services;
 using tkdScoreboard.Services.Interfaces;
+using Microsoft.Scripting.Hosting;
+using IronPython.Hosting;
 
 namespace tkdScoreboard.ViewModels
 {
@@ -20,6 +22,7 @@ namespace tkdScoreboard.ViewModels
 
         // Commandos para abrir ventanas flotantes
         public ICommand OpenSettingsCommand { get; }
+        public ICommand OpenEditScoreboardCommand { get; }
 
         // Propiedades expuestas para la vista
         public string TimerDisplay => CurrentMatch.TimerDisplay;
@@ -73,6 +76,8 @@ namespace tkdScoreboard.ViewModels
         public ICommand ConnectSerialCommand { get; }
         public ICommand DisconnectSerialCommand { get; }
 
+        public ICommand RunPythonScriptCommand { get; }
+
         // Constructor
         public ScoreboardViewModel(IDialogService dialogService)
         {
@@ -82,8 +87,11 @@ namespace tkdScoreboard.ViewModels
             _serialConnection = new SerialConnection("COM3", 115200);
             _serialConnection.DataReceived += OnDataReceived;
 
+            RunPythonScriptCommand = new RelayCommand(RunPythonScript);
+
             // Configuramos los comandos para abrir ventanas flotantes
             OpenSettingsCommand = new RelayCommand(OpenSettings);
+            OpenEditScoreboardCommand = new RelayCommand(OpenEditScoreboard);
 
             // Configuramos los comandos del timer
             ResumeRoundCommand = new RelayCommand(CurrentMatch.ResumeRound, CanResumeRound);
@@ -152,6 +160,32 @@ namespace tkdScoreboard.ViewModels
                 CurrentMatch.RoundTime = settingsViewModel.RoundTime;
                 CurrentMatch.RestTime = settingsViewModel.RestTime;
                 CurrentMatch.PenaltiesLimit = settingsViewModel.PenaltyLimit;
+
+                CurrentMatch._timer.RemainingTime = CurrentMatch.RoundTime;
+                OnPropertyChanged(nameof(CurrentMatch.TimerDisplay));
+            }
+        }
+
+        private void OpenEditScoreboard()
+        {
+            var editScoreboardViewModel = new EditScoreboardViewModel(
+            CurrentMatch.Player1.Points,
+            CurrentMatch.Player1.Penalties,
+            CurrentMatch.Player2.Points,
+            CurrentMatch.Player2.Penalties,
+            CurrentMatch._timer.RemainingTime,
+            null); // El callback lo pone DialogService
+
+            if (_dialogService.ShowEditScoreboardDialog(editScoreboardViewModel))
+            {
+                // Aquí los valores ya están actualizados por DialogService
+                CurrentMatch.Player1.Points = editScoreboardViewModel.Player1Points;
+                CurrentMatch.Player1.Penalties = editScoreboardViewModel.Player1Penalties;
+                CurrentMatch.Player2.Points = editScoreboardViewModel.Player2Points;
+                CurrentMatch.Player2.Penalties = editScoreboardViewModel.Player2Penalties;
+                CurrentMatch._timer.RemainingTime = editScoreboardViewModel.CurrentTime;
+
+                OnPropertyChanged(nameof(CurrentMatch.TimerDisplay));
             }
         }
 
@@ -169,6 +203,13 @@ namespace tkdScoreboard.ViewModels
             }
             else Console.WriteLine("Error al procesar los datos recibidos.");
             OnPropertyChanged(nameof(ReceivedData));
+        }
+
+        public void RunPythonScript()
+        {
+            string scriptPath = @"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\helloWorld.py";
+            ScriptRuntime py = Python.CreateRuntime();
+            dynamic pythonProgram = py.UseFile(scriptPath);
         }
 
         private bool CanResumeRound()

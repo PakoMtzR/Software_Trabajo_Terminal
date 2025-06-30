@@ -37,7 +37,7 @@ namespace tkdScoreboard.Models
         public int Points
         {
             get => _points;
-            private set
+            set
             {
                 if (_points != value)
                 {
@@ -50,7 +50,7 @@ namespace tkdScoreboard.Models
         public int Penalties
         {
             get => _penalties;
-            private set
+            set
             {
                 if (_penalties != value)
                 {

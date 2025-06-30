@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace tkdScoreboard.Views
 {
     /// <summary>
-    /// Lógica de interacción para EditScoreboardView.xaml
+    /// Lógica de interacción para EditScoreboardWindow.xaml
     /// </summary>
-    public partial class EditScoreboardView : Window
+    public partial class EditScoreboardWindow : Window
     {
-        public EditScoreboardView()
+        public EditScoreboardWindow()
         {
             InitializeComponent();
         }

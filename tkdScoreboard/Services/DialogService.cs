@@ -45,6 +45,41 @@ namespace tkdScoreboard.Services
 
             return dialogResult;
         }
+
+        public bool ShowEditScoreboardDialog(EditScoreboardViewModel editScoreViewModel)
+        {
+            if (editScoreViewModel == null) return false;
+
+            var editScoreboardWindow = new EditScoreboardWindow();
+            bool dialogResult = false;
+
+            // Creamos nuevo ViewModel con los mismos parámetros más el callback
+            var vm = new EditScoreboardViewModel(
+                editScoreViewModel.Player1Points,
+                editScoreViewModel.Player1Penalties,
+                editScoreViewModel.Player2Points,
+                editScoreViewModel.Player2Penalties,
+                editScoreViewModel.CurrentTime,
+                result => {
+                    dialogResult = result;
+                    editScoreboardWindow.Close();
+                });
+
+            editScoreboardWindow.DataContext = vm;
+            editScoreboardWindow.ShowDialog();
+
+            // Copiamos los valores de vuelta si se aceptó
+            if (dialogResult)
+            {
+                editScoreViewModel.Player1Points = vm.Player1Points;
+                editScoreViewModel.Player1Penalties = vm.Player1Penalties;
+                editScoreViewModel.Player2Points = vm.Player2Points;
+                editScoreViewModel.Player2Penalties = vm.Player2Penalties;
+                editScoreViewModel.CurrentTime = vm.CurrentTime;
+            }
+
+            return dialogResult;
+        }
     }
 
 }
