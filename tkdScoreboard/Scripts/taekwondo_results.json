@@ -1,15 +1,10 @@
 {
-    "timestamp": "2025-07-01 04:07:41",
+    "timestamp": "2025-07-01 09:58:35",
     "players": [
         {
             "id": 0,
             "color": "red",
-            "kick_count": 8
-        },
-        {
-            "id": 1,
-            "color": "blue",
-            "kick_count": 7
+            "kick_count": 3
         }
     ]
 }

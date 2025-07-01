@@ -115,13 +115,13 @@ class TaekwondoKickCounter:
                     self.players[player_id]['prev_foot_pos'] = current_foot_pos
                     
                     # Dibujar información en el frame
-                    self.draw_player_info(frame, player_id, bbox, current_foot_pos)
+                    self.draw_player_info(frame, player_id, bbox, keypoints_np, keypoints.conf[0].cpu().numpy())
         
         # Mostrar marcador
         self.draw_scoreboard(frame)
         return frame
     
-    def draw_player_info(self, frame, player_id, bbox, foot_pos):
+    def draw_player_info(self, frame, player_id, bbox, keypoints_np, confidences):
         """Dibuja información del jugador en el frame"""
         color = (0, 0, 255) if self.players[player_id]['color'] == 'red' else (255, 0, 0)
         x1, y1, x2, y2 = map(int, bbox)
@@ -129,13 +129,12 @@ class TaekwondoKickCounter:
         # Dibujar bounding box
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
         
+        # Dibujar esqueleto completo
+        self.draw_skeleton(frame, keypoints_np, confidences)
+        
         # Dibujar ID y conteo de patadas
         cv2.putText(frame, f"ID {player_id}: {self.players[player_id]['kick_count']} patadas", 
-                   (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-        
-        # Dibujar posición del pie
-        if foot_pos is not None:
-            cv2.circle(frame, tuple(map(int, foot_pos)), 5, (0, 255, 0), -1)
+                (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     
     def draw_scoreboard(self, frame):
         """Dibuja el marcador en la parte superior del frame"""
@@ -147,6 +146,37 @@ class TaekwondoKickCounter:
         cv2.putText(frame, f"AZUL: {blue_kicks} patadas", (10, 70), 
                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
     
+    def draw_skeleton(self, frame, keypoints_np, confidences):
+        """Dibuja todos los landmarks y sus conexiones para formar un esqueleto"""
+        # Conexiones para el formato COCO (17 puntos)
+        connections = [
+            # Cuerpo
+            (5, 6), (5, 7), (6, 8), (7, 9), (8, 10),
+            # Brazos
+            (5, 11), (6, 12), (11, 13), (12, 14), (13, 15), (14, 16),
+            # Piernas
+            (11, 12), (11, 23), (12, 24), (23, 24), (23, 25), (24, 26), (25, 27), (26, 28)
+        ]
+        
+        # Filtrar solo las conexiones válidas para COCO (0-16)
+        valid_connections = [
+            (start, end) for start, end in connections 
+            if start < 17 and end < 17
+        ]
+        
+        # Dibujar conexiones (huesos)
+        for start, end in valid_connections:
+            if (confidences[start] > 0.3 and confidences[end] > 0.3):
+                start_point = tuple(map(int, keypoints_np[start]))
+                end_point = tuple(map(int, keypoints_np[end]))
+                cv2.line(frame, start_point, end_point, (0, 255, 255), 2)
+        
+        # Dibujar puntos clave (articulaciones)
+        for i, point in enumerate(keypoints_np):
+            if i < 17 and confidences[i] > 0.3:  # Solo los 17 puntos COCO
+                center = tuple(map(int, point))
+                cv2.circle(frame, center, 5, (0, 0, 255), -1)
+
     def save_results(self):
         """Guarda los resultados en un archivo JSON"""
         results = {
@@ -176,13 +206,14 @@ def main():
     # cap = cv2.VideoCapture(1)  # O usar un archivo de video
     
     try:
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
         
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
             
+            frame = cv2.flip(frame, 1)
             processed_frame = kick_counter.process_frame(frame)
             cv2.imshow('Taekwondo Kick Counter', processed_frame)
             
