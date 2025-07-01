@@ -10,6 +10,7 @@ using tkdScoreboard.Services;
 using tkdScoreboard.Services.Interfaces;
 using System.Diagnostics;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace tkdScoreboard.ViewModels
 {
@@ -210,7 +211,7 @@ namespace tkdScoreboard.ViewModels
             // Configuración de los parámetros
             string condaPath = @"D:\miniConda\Scripts\conda.exe"; // Ruta a conda.exe
             string environmentName = "yolo_env"; // Nombre de tu entorno Conda
-            string pythonScriptPath = @"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\yolo_pose_1.py"; // Ruta completa al script Python
+            string pythonScriptPath = @"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\taekwondoKickCounter.py"; // Ruta completa al script Python
             string scriptArguments = ""; // Argumentos para el script (opcional)
 
             // Crear el proceso
@@ -241,8 +242,23 @@ namespace tkdScoreboard.ViewModels
                 }
 
                 process.WaitForExit();
+            }
 
-                // Leer json y agregar puntos 
+            // Leer json y agregar puntos 
+            string jsonString = File.ReadAllText(@"D:\UPIIH\10_Semestre\TrabajoTerminal_II\Programacion\csharp_projects\Solution_tt\tkdScoreboard\Scripts\taekwondo_results.json");
+
+            // Opción 1: Parsear dinámicamente (sin clases)
+            dynamic jsonData = JsonConvert.DeserializeObject(jsonString);
+
+            Console.WriteLine($"Timestamp: {jsonData.timestamp}");
+
+            foreach (var player in jsonData.players)
+            {
+                if (player.color == "blue")
+                    CurrentMatch.Player1.AddPoints(Convert.ToInt32(player.kick_count));
+                else if (player.color == "red")
+                    CurrentMatch.Player2.AddPoints(Convert.ToInt32(player.kick_count));
+                // Console.WriteLine($"Jugador {player.id} ({player.color}): {player.kick_count} patadas");
             }
         }
 
